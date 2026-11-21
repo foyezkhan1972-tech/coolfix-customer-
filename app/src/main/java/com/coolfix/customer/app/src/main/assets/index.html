@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cool Fix Customer</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f7ff;font-family:Arial,sans-serif;color:#172b4d}
+header{background:#0756bd;color:white;padding:25px 18px;border-radius:0 0 22px 22px}
+header h2{margin:0 0 8px}
+header p{margin:0}
+.container{padding:18px}
+.card{background:white;padding:18px;border-radius:15px;margin:14px 0;box-shadow:0 3px 12px #dce6f5}
+h3{margin-top:0;color:#0756bd}
+input,select,textarea{width:100%;padding:13px;margin:8px 0;border:1px solid #ccd7e8;border-radius:9px;font-size:15px}
+button{background:#0756bd;color:white;border:0;padding:13px;border-radius:9px;width:100%;font-size:16px;margin-top:8px}
+.services{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.service{background:#eaf2ff;padding:18px 8px;border-radius:12px;text-align:center;font-weight:bold;color:#0756bd}
+.small{font-size:13px;color:#64748b}
+</style>
+</head>
+<body>
+<header>
+<h2>Cool Fix Bangladesh</h2>
+<p id="welcome">আপনার নির্ভরযোগ্য সার্ভিস পার্টনার</p>
+</header>
+<div class="container">
+
+<div class="card" id="login">
+<h3>Customer Login / লগইন</h3>
+<input id="loginPhone" placeholder="মোবাইল নম্বর">
+<input id="loginPass" type="password" placeholder="পাসওয়ার্ড">
+<button onclick="loginUser()">Login</button>
+<p class="small">নতুন গ্রাহক? নিচে রেজিস্ট্রেশন করুন।</p>
+</div>
+
+<div class="card" id="register">
+<h3>Registration / রেজিস্ট্রেশন</h3>
+<input id="regName" placeholder="আপনার নাম">
+<input id="regPhone" placeholder="মোবাইল নম্বর">
+<input id="regPass" type="password" placeholder="পাসওয়ার্ড">
+<button onclick="registerUser()">Create Account</button>
+</div>
+
+<div id="dashboard" style="display:none">
+<div class="card">
+<h3>Welcome / স্বাগতম</h3>
+<p id="customerName"></p>
+<button onclick="logout()">Logout</button>
+</div>
+
+<div class="card">
+<h3>Our Services / আমাদের সার্ভিস</h3>
+<div class="services">
+<div class="service">❄️<br>AC Service</div>
+<div class="service">🧊<br>Fridge Service</div>
+<div class="service">🍽️<br>Microwave Oven</div>
+<div class="service">🧺<br>Washing Machine</div>
+</div>
+</div>
+
+<div class="card">
+<h3>Book a Service / সার্ভিস বুকিং</h3>
+<input id="bookName" placeholder="আপনার নাম">
+<input id="bookPhone" placeholder="মোবাইল নম্বর">
+<select id="bookService">
+<option value="">সার্ভিস নির্বাচন করুন</option>
+<option>AC Service</option>
+<option>Fridge Service</option>
+<option>Microwave Oven</option>
+<option>Washing Machine</option>
+</select>
+<textarea id="bookAddress" placeholder="সম্পূর্ণ ঠিকানা"></textarea>
+<textarea id="bookProblem" placeholder="সমস্যার বিবরণ"></textarea>
+<button onclick="bookService()">Submit Booking</button>
+</div>
+
+<div class="card">
+<h3>My Bookings / আমার বুকিং</h3>
+<div id="bookingList">এখনো কোনো বুকিং নেই।</div>
+</div>
+</div>
+<p class="small" style="text-align:center">© Cool Fix Bangladesh</p>
+</div>
+
+<script>
+function registerUser(){
+let name=document.getElementById('regName').value.trim();
+let phone=document.getElementById('regPhone').value.trim();
+let pass=document.getElementById('regPass').value;
+if(!name||!phone||!pass){alert('সব তথ্য পূরণ করুন');return}
+let users=JSON.parse(localStorage.getItem('users')||'[]');
+if(users.some(u=>u.phone===phone)){alert('এই নম্বরে অ্যাকাউন্ট আছে');return}
+users.push({name,phone,pass});
+localStorage.setItem('users',JSON.stringify(users));
+alert('Registration successful! এখন লগইন করুন।');
+}
+function loginUser(){
+let phone=document.getElementById('loginPhone').value.trim();
+let pass=document.getElementById('loginPass').value;
+let users=JSON.parse(localStorage.getItem('users')||'[]');
+let user=users.find(u=>u.phone===phone&&u.pass===pass);
+if(!user){alert('মোবাইল নম্বর অথবা পাসওয়ার্ড ভুল');return}
+localStorage.setItem('currentUser',JSON.stringify(user));
+showDashboard(user);
+}
+function showDashboard(user){
+document.getElementById('login').style.display='none';
+document.getElementById('register').style.display='none';
+document.getElementById('dashboard').style.display='block';
+document.getElementById('customerName').innerText='স্বাগতম, '+user.name;
+document.getElementById('bookName').value=user.name;
+document.getElementById('bookPhone').value=user.phone;
+showBookings();
+}
+function logout(){
+localStorage.removeItem('currentUser');
+location.reload();
+}
+function bookService(){
+let service=document.getElementById('bookService').value;
+let address=document.getElementById('bookAddress').value.trim();
+let problem=document.getElementById('bookProblem').value.trim();
+if(!service||!address||!problem){alert('সব তথ্য পূরণ করুন');return}
+let user=JSON.parse(localStorage.getItem('currentUser'));
+let bookings=JSON.parse(localStorage.getItem('bookings')||'[]');
+let id='CFB-'+Date.now().toString().slice(-8);
+bookings.push({id,phone:user.phone,service,address,problem});
+localStorage.setItem('bookings',JSON.stringify(bookings));
+alert('Booking submitted! ID: '+id);
+showBookings();
+}
+function showBookings(){
+let user=JSON.parse(localStorage.getItem('currentUser'));
+let bookings=JSON.parse(localStorage.getItem('bookings')||'[]').filter(b=>b.phone===user.phone);
+document.getElementById('bookingList').innerHTML=bookings.length?bookings.map(b=>'<p><b>'+b.id+'</b><br>'+b.service+'<br>'+b.address+'</p>').join(''):'এখনো কোনো বুকিং নেই।';
+}
+let current=localStorage.getItem('currentUser');
+if(current){showDashboard(JSON.parse(current))}
+</script>
+</body>
+</html>
